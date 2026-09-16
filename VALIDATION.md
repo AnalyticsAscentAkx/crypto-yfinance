@@ -6,6 +6,8 @@ Validated on September 16, 2026 before publishing.
 - Optional technical-analysis dependency: `pandas-ta-classic` imported and tested.
 - Clean wheel installation: imported version 0.3.0 from `site-packages`; dependency check passed.
 - Package validation: wheel and source distribution passed `twine check`.
+- PyPI publication verified: a fresh Python 3.9 environment installed version
+  `0.3.0` from the public simple index and passed `pip check`.
 - Live smoke checks passed for current price, daily history, funding rate, open interest,
   long/short ratio, Coin Metrics on-chain data, RSS news, Fear & Greed, and DeFi ranking.
 - Live coin discovery resolved Hyperliquid to `HYPE_USD` / `hyperliquid`; its price,
