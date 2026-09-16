@@ -13,7 +13,10 @@ news_module = importlib.import_module("cryptofinance.utils.get_news")
 onchain_module = importlib.import_module("cryptofinance.utils.get_onchain")
 defi_module = importlib.import_module("cryptofinance.utils.get_defi_tvl")
 plot_module = importlib.import_module("cryptofinance.utils.plot_price")
+plots_module = importlib.import_module("cryptofinance.utils.plots")
 price_module = importlib.import_module("cryptofinance.utils.get_price")
+resolver_module = importlib.import_module("cryptofinance.utils.coingecko_resolver")
+search_module = importlib.import_module("cryptofinance.utils.search_symbol")
 tickers_module = importlib.import_module("cryptofinance.tickers")
 ticker_module = importlib.import_module("cryptofinance.ticker")
 
@@ -148,6 +151,51 @@ def test_plot_returns_figure_when_rsi_is_unavailable(monkeypatch):
     figure = plot_module.plot_price("BTC_USD", days=2, show=False)
     assert figure is not None
     assert len(figure.data) == 2  # candle and volume; RSI omitted
+
+
+def test_price_plot_adds_moving_averages_and_bollinger(monkeypatch):
+    monkeypatch.setattr(plot_module, "get_history", lambda *args, **kwargs: frame(periods=60))
+    figure = plot_module.plot_price(
+        "BTC_USD", days=60, show_rsi=False, moving_averages=(10, 20),
+        show_bollinger=True, show=False,
+    )
+    names = [trace.name for trace in figure.data]
+    assert {"SMA 10", "SMA 20", "Bollinger upper", "Bollinger band"} <= set(names)
+    assert figure.layout.hovermode == "x unified"
+
+
+def test_search_returns_ranked_ready_to_use_pairs(monkeypatch):
+    client = Mock()
+    client.search.return_value = {"coins": [
+        {"id": "small-hype", "symbol": "hype", "name": "Other Hype", "market_cap_rank": 900},
+        {"id": "hyperliquid", "symbol": "hype", "name": "Hyperliquid", "market_cap_rank": 20},
+    ]}
+    monkeypatch.setattr(search_module, "CoinGeckoAPI", lambda: client)
+    matches = search_module.search_symbol("HYPE", quote="EUR")
+    assert matches[0]["id"] == "hyperliquid"
+    assert matches[0]["pair"] == "HYPE_EUR"
+
+
+def test_ticker_from_name_registers_new_coin(monkeypatch):
+    monkeypatch.setattr(ticker_module, "search_symbol", lambda *args, **kwargs: [{
+        "id": "brand-new-coin", "symbol": "NEW", "name": "New Coin",
+        "market_cap_rank": 123, "pair": "NEW_USD",
+    }])
+    ticker = Ticker.from_name("New Coin")
+    assert ticker.symbol == "new_usd"
+    assert resolver_module.CG_ID_MAP["NEW"] == "brand-new-coin"
+
+
+def test_market_heatmap_returns_figure(monkeypatch):
+    monkeypatch.setattr(plots_module, "get_top_coins", lambda **kwargs: pd.DataFrame([
+        {"name": "Bitcoin", "symbol": "BTC", "price": 100,
+         "market_cap": 1000, "volume_24h": 100, "price_change_pct_24h": 2.5},
+        {"name": "Ethereum", "symbol": "ETH", "price": 10,
+         "market_cap": 500, "volume_24h": 50, "price_change_pct_24h": -1.0},
+    ]))
+    figure = plots_module.plot_market_heatmap(show=False)
+    assert figure.data[0].type == "treemap"
+    assert list(figure.data[0].labels) == ["BTC", "ETH"]
 
 
 def test_onchain_queries_only_community_metrics(monkeypatch):

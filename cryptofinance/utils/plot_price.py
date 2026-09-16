@@ -1,6 +1,6 @@
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import pandas as pd
+from typing import Iterable, Optional
 
 from .get_history import get_history
 
@@ -11,6 +11,8 @@ def plot_price(
     interval: str = "daily",
     show_volume: bool = True,
     show_rsi: bool = True,
+    moving_averages: Optional[Iterable[int]] = (20, 50),
+    show_bollinger: bool = False,
     theme: str = "plotly_dark",
     show: bool = True,
 ):
@@ -23,6 +25,8 @@ def plot_price(
     interval    : ``'daily'``, ``'hourly'``, ``'4h'``, ``'15m'``
     show_volume : show volume bars below candles (default True)
     show_rsi    : show RSI panel at the bottom (default True, requires pandas-ta)
+    moving_averages : simple moving-average windows; use ``None`` to disable
+    show_bollinger : overlay 20-period Bollinger Bands (default False)
     theme       : plotly template (default ``'plotly_dark'``)
     show        : display the chart immediately (default True)
 
@@ -31,6 +35,16 @@ def plot_price(
     plotly.graph_objects.Figure
     """
     df = get_history(symbol, days=days, interval=interval)
+    if df.empty:
+        raise ValueError(f"No history available for {symbol}")
+
+    ma_windows = []
+    if moving_averages is not None:
+        for window in moving_averages:
+            if not isinstance(window, int) or isinstance(window, bool) or window < 2:
+                raise ValueError("moving-average windows must be integers of at least 2")
+            if window not in ma_windows:
+                ma_windows.append(window)
 
     rsi_series = None
     if show_rsi:
@@ -82,6 +96,41 @@ def plot_price(
         row=1, col=1,
     )
 
+    palette = ["#42a5f5", "#ffb300", "#ab47bc", "#7e57c2"]
+    for index, window in enumerate(ma_windows):
+        values = df["close"].rolling(window=window, min_periods=window).mean()
+        if values.notna().any():
+            fig.add_trace(
+                go.Scatter(
+                    x=df["timestamp"], y=values, mode="lines",
+                    line=dict(color=palette[index % len(palette)], width=1.3),
+                    name=f"SMA {window}",
+                    hovertemplate=f"SMA {window}: %{{y:,.6g}}<extra></extra>",
+                ),
+                row=1, col=1,
+            )
+
+    if show_bollinger:
+        middle = df["close"].rolling(window=20, min_periods=20).mean()
+        deviation = df["close"].rolling(window=20, min_periods=20).std()
+        upper, lower = middle + 2 * deviation, middle - 2 * deviation
+        if middle.notna().any():
+            fig.add_trace(
+                go.Scatter(
+                    x=df["timestamp"], y=upper, mode="lines",
+                    line=dict(color="rgba(171,71,188,0.75)", width=1),
+                    name="Bollinger upper", hoverinfo="skip",
+                ), row=1, col=1,
+            )
+            fig.add_trace(
+                go.Scatter(
+                    x=df["timestamp"], y=lower, mode="lines",
+                    line=dict(color="rgba(171,71,188,0.75)", width=1),
+                    fill="tonexty", fillcolor="rgba(171,71,188,0.08)",
+                    name="Bollinger band", hoverinfo="skip",
+                ), row=1, col=1,
+            )
+
     # ── Volume bars ──────────────────────────────────────────────────────────
     if show_volume:
         vol_row = 2
@@ -122,9 +171,23 @@ def plot_price(
         template=theme,
         title=dict(text=f"{symbol.upper()}  ·  {days}d  ·  {interval}", x=0.5),
         xaxis_rangeslider_visible=False,
-        showlegend=False,
+        showlegend=bool(ma_windows or show_bollinger),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        hovermode="x unified",
         margin=dict(l=40, r=40, t=60, b=20),
         height=600 + 100 * (n_rows - 1),
+    )
+    fig.update_xaxes(
+        rangeslider_visible=False,
+        rangeselector=dict(
+            buttons=[
+                dict(count=7, label="7D", step="day", stepmode="backward"),
+                dict(count=1, label="1M", step="month", stepmode="backward"),
+                dict(count=3, label="3M", step="month", stepmode="backward"),
+                dict(step="all", label="All"),
+            ]
+        ),
+        row=1, col=1,
     )
     fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="rgba(255,255,255,0.06)")
 

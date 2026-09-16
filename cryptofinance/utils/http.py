@@ -14,7 +14,7 @@ _RETRYABLE = {429, 500, 502, 503, 504}
 def _session():
     if not hasattr(_LOCAL, "session"):
         _LOCAL.session = requests.Session()
-        _LOCAL.session.headers["User-Agent"] = "crypto-yfinance/0.2.1"
+        _LOCAL.session.headers["User-Agent"] = "crypto-yfinance/0.3.0"
     return _LOCAL.session
 
 

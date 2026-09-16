@@ -107,6 +107,26 @@ class Tickers:
                 logger.warning("Coin profile unavailable for %s: %s", sym, exc)
         return pd.DataFrame(rows).set_index("symbol") if rows else pd.DataFrame()
 
+    def plot(self, days: int = 90, theme: str = "plotly_dark", show: bool = True):
+        """Compare all assets as indexed returns and return a Plotly figure."""
+        from .utils.plots import plot_compare
+        return plot_compare(
+            [symbol.upper() for symbol in self._symbols],
+            days=days,
+            theme=theme,
+            show=show,
+        )
+
+    def correlation(self, days: int = 90, theme: str = "plotly_dark", show: bool = True):
+        """Plot the return-correlation matrix for all assets."""
+        from .utils.plots import plot_correlation
+        return plot_correlation(
+            [symbol.upper() for symbol in self._symbols],
+            days=days,
+            theme=theme,
+            show=show,
+        )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Module-level download() — mirrors yfinance.download()

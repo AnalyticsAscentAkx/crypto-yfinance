@@ -19,11 +19,17 @@ from .get_defi_tvl import get_top_defi
 _THEME = "plotly_dark"
 
 
+def _finish(fig, show: bool):
+    if show:
+        fig.show()
+    return fig
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Fear & Greed
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_fear_greed(days: int = 30) -> None:
+def plot_fear_greed(days: int = 30, theme: str = _THEME, show: bool = True):
     """Gauge chart for today's Fear & Greed index plus a 30-day trend line.
 
     Parameters
@@ -79,19 +85,19 @@ def plot_fear_greed(days: int = 30) -> None:
     fig.add_hline(y=50, line_dash="dot", line_color="white", line_width=0.6, row=1, col=2)
 
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"Crypto Fear & Greed Index  ·  {days}d", x=0.5),
         showlegend=False,
         height=400,
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Market Dominance
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_dominance(top_n: int = 8) -> None:
+def plot_dominance(top_n: int = 8, theme: str = _THEME, show: bool = True):
     """Donut chart of market dominance split by asset.
 
     Parameters
@@ -119,18 +125,18 @@ def plot_dominance(top_n: int = 8) -> None:
         hovertemplate="%{label}: %{value:.2f}%<extra></extra>",
     ))
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text="Crypto Market Dominance", x=0.5),
         height=500,
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Market Cap
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_market_cap(symbol: str, days: int = 90) -> None:
+def plot_market_cap(symbol: str, days: int = 90, theme: str = _THEME, show: bool = True):
     """Area chart of a coin's market cap over time.
 
     Parameters
@@ -149,19 +155,19 @@ def plot_market_cap(symbol: str, days: int = 90) -> None:
         name="Market Cap",
     ))
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"{symbol.upper()} Market Cap  ·  {days}d", x=0.5),
         yaxis_title="Market Cap (USD)",
         height=420,
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Multi-asset price comparison
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_compare(symbols: list, days: int = 90) -> None:
+def plot_compare(symbols: list, days: int = 90, theme: str = _THEME, show: bool = True):
     """Normalised return comparison for multiple assets.
 
     All prices are indexed to 100 at the start of the period so you can
@@ -177,10 +183,10 @@ def plot_compare(symbols: list, days: int = 90) -> None:
         df = get_history(sym, days=days, interval="daily")
         if df.empty or df["close"].iloc[0] == 0:
             continue
-        df["indexed"] = df["close"] / df["close"].iloc[0] * 100
+        indexed = df["close"] / df["close"].iloc[0] * 100
         fig.add_trace(go.Scatter(
             x=df["timestamp"],
-            y=df["indexed"],
+            y=indexed,
             mode="lines",
             name=sym.split("_")[0].upper(),
             hovertemplate="%{y:.1f}<extra>%{fullData.name}</extra>",
@@ -188,19 +194,20 @@ def plot_compare(symbols: list, days: int = 90) -> None:
 
     fig.add_hline(y=100, line_dash="dot", line_color="white", line_width=0.5)
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"Price Comparison (indexed to 100)  ·  {days}d", x=0.5),
         yaxis_title="Indexed Return",
         height=480,
+        hovermode="x unified",
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Correlation heatmap
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_correlation(symbols: list, days: int = 90) -> None:
+def plot_correlation(symbols: list, days: int = 90, theme: str = _THEME, show: bool = True):
     """Heatmap of pairwise return correlations between assets.
 
     Values range from -1 (perfectly inverse) to +1 (perfectly correlated).
@@ -233,18 +240,18 @@ def plot_correlation(symbols: list, days: int = 90) -> None:
         hovertemplate="%{y} vs %{x}: %{z}<extra></extra>",
     ))
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"Return Correlation  ·  {days}d", x=0.5),
         height=500,
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Funding rate
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_funding_rate(symbol: str, limit: int = 90) -> None:
+def plot_funding_rate(symbol: str, limit: int = 90, theme: str = _THEME, show: bool = True):
     """Funding rate bars overlaid with price — spot the squeeze setups.
 
     Green bars = longs paying shorts (bullish bias).
@@ -282,19 +289,20 @@ def plot_funding_rate(symbol: str, limit: int = 90) -> None:
     fig.add_hline(y=0, line_color="white", line_width=0.5, row=2, col=1)
 
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"{symbol.upper()} Funding Rate", x=0.5),
         showlegend=False,
         height=580,
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # On-chain overlay
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_onchain(symbol: str, metric: str = "active_addresses", days: int = 90) -> None:
+def plot_onchain(symbol: str, metric: str = "active_addresses", days: int = 90,
+                 theme: str = _THEME, show: bool = True):
     """On-chain metric plotted against price — dual y-axis.
 
     Parameters
@@ -307,6 +315,9 @@ def plot_onchain(symbol: str, metric: str = "active_addresses", days: int = 90) 
     """
     onchain = get_onchain(symbol.split("_")[0], days=days)
     price = get_history(symbol, days=days, interval="daily")
+    if metric not in onchain.columns:
+        available = ", ".join(c for c in onchain.columns if c != "timestamp")
+        raise ValueError(f"Unknown on-chain metric {metric!r}. Available: {available}")
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -322,20 +333,20 @@ def plot_onchain(symbol: str, metric: str = "active_addresses", days: int = 90) 
     )
 
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"{symbol.upper()}  ·  Price vs {metric.replace('_', ' ').title()}", x=0.5),
         height=480,
     )
     fig.update_yaxes(title_text="Price (USD)", secondary_y=False)
     fig.update_yaxes(title_text=metric.replace("_", " ").title(), secondary_y=True)
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top DeFi protocols
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_defi_tvl(n: int = 15) -> None:
+def plot_defi_tvl(n: int = 15, theme: str = _THEME, show: bool = True):
     """Horizontal bar chart of the top N DeFi protocols by TVL.
 
     Parameters
@@ -351,19 +362,19 @@ def plot_defi_tvl(n: int = 15) -> None:
         hovertemplate="%{y}: $%{x:,.0f}<extra></extra>",
     ))
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"Top {n} DeFi Protocols by TVL", x=0.5),
         xaxis_title="TVL (USD)",
         height=max(400, n * 28),
     )
-    fig.show()
+    return _finish(fig, show)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Market snapshot — top coins bubble chart
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_market_snapshot(n: int = 50) -> None:
+def plot_market_snapshot(n: int = 50, theme: str = _THEME, show: bool = True):
     """Bubble chart: market cap vs 24h price change for the top N coins.
 
     Bubble size = trading volume. Color = positive/negative day.
@@ -398,9 +409,62 @@ def plot_market_snapshot(n: int = 50) -> None:
     fig.update_xaxes(type="log", title="Market Cap (USD, log scale)")
     fig.add_hline(y=0, line_dash="dot", line_color="white", line_width=0.5)
     fig.update_layout(
-        template=_THEME,
+        template=theme,
         title=dict(text=f"Market Snapshot — Top {n} Coins", x=0.5),
         yaxis_title="24h Price Change (%)",
         height=560,
     )
-    fig.show()
+    return _finish(fig, show)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Crypto market heatmap
+# ─────────────────────────────────────────────────────────────────────────────
+
+def plot_market_heatmap(n: int = 50, currency: str = "usd",
+                        theme: str = _THEME, show: bool = True):
+    """Treemap of the largest coins sized by market cap and colored by 24h move.
+
+    This gives a compact market-wide view similar to a stock-market heatmap.
+    ``show=False`` returns the figure for notebooks, dashboards, or export.
+    """
+    df = get_top_coins(n=n, currency=currency).dropna(
+        subset=["market_cap", "price_change_pct_24h"]
+    )
+    if df.empty:
+        raise ValueError("No market data available for the heatmap")
+
+    currency_upper = currency.upper()
+    customdata = df[["name", "price", "volume_24h"]].to_numpy()
+    fig = go.Figure(go.Treemap(
+        labels=df["symbol"],
+        parents=["Crypto"] * len(df),
+        values=df["market_cap"],
+        branchvalues="total",
+        customdata=customdata,
+        marker=dict(
+            colors=df["price_change_pct_24h"],
+            colorscale=[
+                [0.0, "#b71c1c"], [0.35, "#ef5350"], [0.5, "#455a64"],
+                [0.65, "#66bb6a"], [1.0, "#00695c"],
+            ],
+            cmid=0,
+            colorbar=dict(title="24h %"),
+            line=dict(width=1, color="rgba(255,255,255,0.35)"),
+        ),
+        texttemplate="<b>%{label}</b><br>%{color:.2f}%",
+        hovertemplate=(
+            "<b>%{customdata[0]} (%{label})</b><br>"
+            f"Price: %{{customdata[1]:,.6g}} {currency_upper}<br>"
+            f"Market cap: %{{value:,.0f}} {currency_upper}<br>"
+            "24h change: %{color:.2f}%<br>"
+            f"Volume: %{{customdata[2]:,.0f}} {currency_upper}<extra></extra>"
+        ),
+    ))
+    fig.update_layout(
+        template=theme,
+        title=dict(text=f"Crypto Market Heatmap — Top {n}", x=0.5),
+        margin=dict(l=10, r=10, t=55, b=10),
+        height=650,
+    )
+    return _finish(fig, show)

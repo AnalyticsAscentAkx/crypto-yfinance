@@ -22,6 +22,8 @@ from .utils.get_onchain import get_onchain
 from .utils.get_news import get_news
 from .utils.get_technicals import get_technicals
 from .utils.plot_price import plot_price
+from .utils.coingecko_resolver import register_coin, resolve_cg_id
+from .utils.search_symbol import search_symbol
 
 
 class Ticker:
@@ -45,11 +47,35 @@ class Ticker:
     def __init__(self, symbol: str):
         self._symbol = "_".join(split_pair(symbol)).lower()
 
+    @classmethod
+    def from_name(cls, query: str, quote: str = "USD"):
+        """Create a ticker by searching a coin name, symbol, or CoinGecko ID.
+
+        This supports newly launched coins without waiting for a package update.
+        The highest-ranked exact match is selected.
+        """
+        matches = search_symbol(query, quote=quote, limit=1)
+        if not matches:
+            raise ValueError(f"No cryptocurrency found for {query!r}")
+        match = matches[0]
+        register_coin(match["symbol"], match["id"])
+        return cls(match["pair"])
+
+    @staticmethod
+    def search(query: str, quote: str = "USD", limit: int = 10) -> list:
+        """Find coins and return names, symbols, IDs, ranks, and usable pairs."""
+        return search_symbol(query, quote=quote, limit=limit)
+
     # ── Internals ─────────────────────────────────────────────────────────
 
     @property
     def symbol(self) -> str:
         return self._symbol
+
+    @property
+    def coingecko_id(self) -> str:
+        """CoinGecko ID currently mapped to this asset."""
+        return resolve_cg_id(self._symbol.split("_")[0].upper())
 
     # ── Price & OHLCV ─────────────────────────────────────────────────────
 
@@ -164,10 +190,15 @@ class Ticker:
     # ── Plotting ──────────────────────────────────────────────────────────
 
     def plot(self, days: int = 30, interval: str = "daily",
-             show_volume: bool = True, show_rsi: bool = True, show: bool = True):
-        """Return a candlestick figure; use show=False to embed or export it."""
+             show_volume: bool = True, show_rsi: bool = True,
+             moving_averages=(20, 50), show_bollinger: bool = False,
+             theme: str = "plotly_dark", show: bool = True):
+        """Return an interactive candlestick chart with optional indicators."""
         return plot_price(self._symbol, days=days, interval=interval,
-                          show_volume=show_volume, show_rsi=show_rsi, show=show)
+                          show_volume=show_volume, show_rsi=show_rsi,
+                          moving_averages=moving_averages,
+                          show_bollinger=show_bollinger,
+                          theme=theme, show=show)
 
     # ── Dunder ────────────────────────────────────────────────────────────
 

@@ -15,7 +15,7 @@ DeFi TVL, sentiment, and more. All in one library, all with one import.
     >>> plot_dominance()
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __author__  = "Aakash Chavan Ravindranath"
 
 import logging
@@ -37,6 +37,7 @@ from .utils.get_global     import get_global
 from .utils.get_dominance  import get_dominance
 from .utils.get_news       import get_news
 from .utils.search_symbol  import search_symbol
+from .utils.coingecko_resolver import register_coin
 
 # ── Sentiment ────────────────────────────────────────────────────────────────
 from .utils.get_fear_greed import get_fear_greed
@@ -70,6 +71,7 @@ from .utils.plots import (
     plot_onchain,
     plot_defi_tvl,
     plot_market_snapshot,
+    plot_market_heatmap,
 )
 
 # ── Cache control ─────────────────────────────────────────────────────────────
@@ -81,7 +83,7 @@ __all__ = [
     # Market data
     "get_price", "get_history", "get_market_cap", "get_volume",
     "get_info", "get_trending", "get_top_coins", "get_global",
-    "get_dominance", "get_news", "search_symbol",
+    "get_dominance", "get_news", "search_symbol", "register_coin",
     # Sentiment
     "get_fear_greed",
     # Derivatives
@@ -97,7 +99,7 @@ __all__ = [
     # Plots
     "plot_price", "plot_fear_greed", "plot_dominance", "plot_market_cap",
     "plot_compare", "plot_correlation", "plot_funding_rate",
-    "plot_onchain", "plot_defi_tvl", "plot_market_snapshot",
+    "plot_onchain", "plot_defi_tvl", "plot_market_snapshot", "plot_market_heatmap",
     # Utilities
     "clear_cache",
 ]

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.0 — 2026-09-16
+
+### Added
+
+- `Ticker.from_name()` and `Ticker.search()` for discovering current or newly
+  launched cryptocurrencies by name, symbol, or CoinGecko ID.
+- `register_coin()` for explicitly mapping ambiguous or brand-new symbols.
+- Popular newer assets including POL, KAS, TAO, HYPE, ONDO, TRUMP, ENA, AERO,
+  PENGU, W, JASMY, and RENDER in the fast local resolver.
+- `plot_market_heatmap()` for a market-cap treemap colored by 24-hour movement.
+- SMA overlays, optional Bollinger Bands, range buttons, and unified hover on
+  candlestick charts.
+- `Tickers.plot()` and `Tickers.correlation()` portfolio visualization methods.
+
+### Changed
+
+- Coin discovery now prioritizes exact symbol/name/ID matches and market-cap
+  rank, reducing incorrect matches for shared symbols.
+- Every chart helper accepts `show=False` and returns its Plotly `Figure`, so
+  charts can be embedded in notebooks and apps or exported to HTML/images.
+- Chart helpers consistently accept a Plotly `theme` argument.
+
 ## 0.2.1 — 2026-09-16
 
 ### Fixed

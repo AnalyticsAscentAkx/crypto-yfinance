@@ -10,7 +10,7 @@
 
 I got tired of stitching together five different libraries every time I wanted to do proper crypto analysis. Price data from one place, on-chain metrics from another, funding rates somewhere else, and a random script I found online for fear & greed. It was a mess, and I kept rewriting the same boilerplate code in every project.
 
-So I built this. One library that handles all of it — market data, derivatives, on-chain metrics, DeFi TVL, sentiment, technical indicators, and charts. You shouldn't need to install seperate libraries just to answer a simple question about Bitcoin.
+So I built this. One library that handles all of it — market data, derivatives, on-chain metrics, DeFi TVL, sentiment, technical indicators, and charts. You shouldn't need to install separate libraries just to answer a simple question about Bitcoin.
 
 The API design is heavily inspired by `yfinance`. If you've used that, you'll feel right at home.
 
@@ -26,7 +26,7 @@ The API design is heavily inspired by `yfinance`. If you've used that, you'll fe
 | **DeFi** | Protocol TVL, top protocols, TVL by chain (DeFiLlama) |
 | **Sentiment** | Fear & Greed Index with full history |
 | **Technical Analysis** | RSI, MACD, Bollinger Bands, EMA, ATR, OBV built-in |
-| **Plots** | 9 chart types — candlestick, correlation heatmap, dominance, funding rate, and more |
+| **Plots** | 10 chart types — candlestick, market heatmap, correlation, dominance, funding rate, and more |
 
 No API key is required. The package uses public provider endpoints. You can set
 `COINGECKO_DEMO_API_KEY` to improve CoinGecko rate limits, but it is optional.
@@ -116,8 +116,33 @@ t.technicals(days=90)                   # DataFrame — OHLCV + RSI, MACD, BB, A
 
 t.plot(days=30, interval='daily')       # candlestick + volume + RSI chart
 t.plot(show_rsi=False)                  # candlestick + volume only
+t.plot(show_bollinger=True)             # add Bollinger Bands
+t.plot(moving_averages=(10, 20, 50))    # choose SMA overlays
 t.plot(show=False)                      # return a Plotly figure without displaying it
 ```
+
+### Find new cryptocurrencies
+
+Coin discovery is live, so newly launched assets do not need to be hard-coded
+in a package release:
+
+```python
+from cryptofinance import Ticker, search_symbol, register_coin
+
+Ticker.search('hyperliquid')
+# [{'id': 'hyperliquid', 'symbol': 'HYPE', 'name': 'Hyperliquid',
+#   'market_cap_rank': ..., 'pair': 'HYPE_USD'}]
+
+hype = Ticker.from_name('hyperliquid')
+print(hype.symbol, hype.coingecko_id, hype.price)
+
+# Resolve a shared or extremely new symbol explicitly when needed
+register_coin('MYCOIN', 'my-coingecko-id')
+coin = Ticker('MYCOIN_USD')
+```
+
+Search accepts a coin name, ticker symbol, or CoinGecko ID. Exact matches are
+ranked by market cap to reduce ambiguity when several projects share a symbol.
 
 `days` always means calendar days, including for intraday intervals. History
 contains complete, closed candles and uses timezone-naive UTC candle-open times.
@@ -141,6 +166,8 @@ t['BTC_USD'].info         # access individual Ticker
 t.history(days=30)        # combined multi-level DataFrame
 t.prices()                # {'BTC_USD': 95420.0, 'ETH_USD': 3210.5, ...}
 t.fast_info()             # summary table for all assets
+t.plot(days=90)           # indexed performance comparison
+t.correlation(days=90)    # return-correlation heatmap
 
 # Or use download() directly
 df = download('BTC_USD', days=90)
@@ -301,12 +328,13 @@ All charts are interactive Plotly figures that open in your browser or render in
 from cryptofinance import (
     plot_price, plot_fear_greed, plot_dominance, plot_market_cap,
     plot_compare, plot_correlation, plot_funding_rate,
-    plot_onchain, plot_defi_tvl, plot_market_snapshot
+    plot_onchain, plot_defi_tvl, plot_market_snapshot, plot_market_heatmap
 )
 
 # Candlestick + volume + RSI (3 panels)
 plot_price('BTC_USD', days=60, interval='daily')
 plot_price('ETH_USD', days=7, interval='hourly', show_rsi=False)
+plot_price('SOL_USD', days=90, moving_averages=(20, 50), show_bollinger=True)
 
 # Fear & Greed gauge + 30-day bar chart
 plot_fear_greed(days=30)
@@ -335,6 +363,16 @@ plot_defi_tvl(n=15)
 
 # Bubble chart: market cap vs 24h change, sized by volume
 plot_market_snapshot(n=50)
+
+# Market-cap treemap, colored by 24-hour performance
+plot_market_heatmap(n=50)
+```
+
+Every chart returns a Plotly `Figure`. Pass `show=False` to embed or export it:
+
+```python
+fig = plot_market_heatmap(n=100, show=False)
+fig.write_html('crypto-market.html')
 ```
 
 ---

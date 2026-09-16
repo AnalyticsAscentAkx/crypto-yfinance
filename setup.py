@@ -5,7 +5,7 @@ readme = Path("README.md").read_text(encoding="utf-8") if Path("README.md").exis
 
 setup(
     name="crypto-yfinance",
-    version="0.2.1",
+    version="0.3.0",
     packages=find_packages(),
     install_requires=[
         "ccxt>=4.0.0",
