@@ -1,3 +1,55 @@
 [build-system]
-requires = ["setuptools>=70.0", "wheel>=0.41"]
+requires = ["setuptools>=77.0", "wheel>=0.41"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "crypto-yfinance"
+dynamic = ["version"]
+description = "Unified cryptocurrency data API: prices, on-chain, derivatives, DeFi, sentiment and more"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Aakash Chavan Ravindranath", email = "craakash@gmail.com" }]
+dependencies = [
+    "ccxt>=4.0.0",
+    "pycoingecko>=3.1.0",
+    "pandas>=1.5.0",
+    "plotly>=5.0.0",
+    "requests>=2.28.0",
+]
+keywords = [
+    "crypto", "cryptocurrency", "bitcoin", "ethereum", "finance",
+    "data", "api", "trading", "defi", "on-chain", "blockchain",
+    "binance", "coingecko", "defillama", "yfinance",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+]
+
+[project.optional-dependencies]
+ta = ["pandas-ta-classic>=0.3.15"]
+full = ["pandas-ta-classic>=0.3.15"]
+
+[project.urls]
+Source = "https://github.com/AnalyticsAscentAkx/crypto-yfinance"
+Issues = "https://github.com/AnalyticsAscentAkx/crypto-yfinance/issues"
+Homepage = "https://medium.com/@craakash"
+LinkedIn = "https://www.linkedin.com/in/aakashcr/"
+
+[tool.setuptools.dynamic]
+version = { attr = "cryptofinance.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["cryptofinance*"]

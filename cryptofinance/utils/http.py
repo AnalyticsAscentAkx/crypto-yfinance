@@ -6,6 +6,8 @@ from urllib.parse import urlsplit
 
 import requests
 
+from .. import __version__
+
 logger = logging.getLogger("cryptofinance")
 _LOCAL = threading.local()
 _RETRYABLE = {429, 500, 502, 503, 504}
@@ -14,7 +16,7 @@ _RETRYABLE = {429, 500, 502, 503, 504}
 def _session():
     if not hasattr(_LOCAL, "session"):
         _LOCAL.session = requests.Session()
-        _LOCAL.session.headers["User-Agent"] = "crypto-yfinance/0.3.0"
+        _LOCAL.session.headers["User-Agent"] = f"crypto-yfinance/{__version__}"
     return _LOCAL.session
 
 
