@@ -14,8 +14,9 @@ Validated on October 20, 2026 before publishing.
   returned funding, open interest and long/short rows in matching units.
 - Funding intervals were checked against Binance `fundingInfo`: BTCUSDT measured 8 hours
   and GTCUSDT measured 4 hours, matching the exchange's published settings.
-- Not tested: the fallback from a region where Binance is blocked. The weekly
-  `live providers` workflow runs on GitHub's US runners and will show which provider answers there.
+- Region fallback: the `live providers` workflow on a GitHub US runner (run 39446858988)
+  passed all 12 checks. Binance and Bybit were unavailable there; history came from
+  Coinbase and funding, open interest and long/short from OKX.
 
 The final release artifacts are in `release/0.3.1/`:
 
