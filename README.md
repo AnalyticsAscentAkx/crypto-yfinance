@@ -422,7 +422,7 @@ logging.getLogger('cryptofinance').setLevel(logging.DEBUG)
 
 ## Contributing
 
-Issues and PRs are welcome at [github.com/craakash/crypto-yfinance](https://github.com/craakash/crypto-yfinance).
+Issues and PRs are welcome at [github.com/AnalyticsAscentAkx/crypto-yfinance](https://github.com/AnalyticsAscentAkx/crypto-yfinance).
 
 If something is broken or you want a feature added, open an issue and I'll try to get to it.
 
@@ -432,5 +432,5 @@ If something is broken or you want a feature added, open an issue and I'll try t
 
 MIT — do whatever you want with it.
 
-See the [changelog](https://github.com/craakash/crypto-yfinance/blob/main/CHANGELOG.md)
+See the [changelog](https://github.com/AnalyticsAscentAkx/crypto-yfinance/blob/main/CHANGELOG.md)
 for release-by-release changes.

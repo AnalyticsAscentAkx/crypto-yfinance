@@ -23,10 +23,10 @@ setup(
     description="Unified cryptocurrency data API — prices, on-chain, derivatives, DeFi, sentiment and more",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/craakash/crypto-yfinance",
+    url="https://github.com/AnalyticsAscentAkx/crypto-yfinance",
     project_urls={
-        "Source":   "https://github.com/craakash/crypto-yfinance",
-        "Issues":   "https://github.com/craakash/crypto-yfinance/issues",
+        "Source":   "https://github.com/AnalyticsAscentAkx/crypto-yfinance",
+        "Issues":   "https://github.com/AnalyticsAscentAkx/crypto-yfinance/issues",
         "Homepage": "https://medium.com/@craakash",
         "LinkedIn": "https://www.linkedin.com/in/aakashcr/",
     },

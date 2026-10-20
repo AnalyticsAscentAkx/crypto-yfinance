@@ -4,7 +4,7 @@ The upload-ready files are in `release/0.3.0/`.
 
 ## Before publishing
 
-1. Push this source repository to `https://github.com/craakash/crypto-yfinance`.
+1. Push this source repository to `https://github.com/AnalyticsAscentAkx/crypto-yfinance`.
 2. Confirm the GitHub Actions test matrix passes.
 3. Test the package on TestPyPI if this is your first release from this checkout.
 
