@@ -237,3 +237,15 @@ def test_top_defi_handles_null_tvl(monkeypatch):
 def test_pair_validation(symbol):
     with pytest.raises(ValueError):
         Ticker(symbol)
+
+
+def test_funding_annualizes_by_measured_interval(monkeypatch):
+    start = 1_800_000_000_000
+    rows = [{"fundingTime": start + i * 4 * 3_600_000 + 3, "fundingRate": "0.0001"}
+            for i in range(4)]
+    funding_module = importlib.import_module("cryptofinance.utils.get_funding_rate")
+    monkeypatch.setattr(funding_module, "get_json", lambda *args, **kwargs: rows)
+    result = funding_module.get_funding_rate("GTC_USD", limit=3)
+    assert len(result) == 3
+    assert result["funding_interval_hours"].tolist() == [4, 4, 4]
+    assert result["annualized_pct"].iloc[0] == pytest.approx(0.0001 * 6 * 365 * 100)

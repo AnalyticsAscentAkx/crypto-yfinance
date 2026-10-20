@@ -261,17 +261,18 @@ def plot_funding_rate(symbol: str, limit: int = 90, theme: str = _THEME, show: b
     Parameters
     ----------
     symbol : e.g. ``'BTC_USD'``
-    limit  : number of 8h funding periods to show (default 90 ≈ 30 days)
+    limit  : number of funding settlements to show (default 90, about 30 days on 8h perps)
     """
     fr = get_funding_rate(symbol, limit=limit)
-    price = get_history(symbol, days=max(limit // 3, 30), interval="daily")
+    span_days = (fr["timestamp"].max() - fr["timestamp"].min()).days + 1
+    price = get_history(symbol, days=max(span_days, 30), interval="daily")
 
     fig = make_subplots(
         rows=2, cols=1,
         shared_xaxes=True,
         vertical_spacing=0.04,
         row_heights=[0.55, 0.45],
-        subplot_titles=[f"{symbol.upper()} Price", "Funding Rate (8h)"],
+        subplot_titles=[f"{symbol.upper()} Price", "Funding Rate (per settlement)"],
     )
 
     fig.add_trace(
