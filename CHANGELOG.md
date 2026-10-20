@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.1 (2026-10-20)
+
+### Fixed
+
+- `get_funding_rate()` annualized every contract as if it settled every 8 hours.
+  Many Binance perps settle every 4 hours or hourly, so their `annualized_pct` was
+  2 to 8 times too low. The interval is now measured per row and returned as
+  `funding_interval_hours`.
+- `plot_funding_rate()` sized its price window and title for 8-hour funding.
+- `Ticker.price` and `get_price()` cached prices for 5 minutes; they now cache
+  for at most 15 seconds.
+
+### Changed
+
+- `get_funding_rate()`, `get_open_interest()` and `get_long_short_ratio()` fall back
+  to Bybit and then OKX when Binance is unreachable or blocked in your region.
+  The provider used is in `df.attrs['source']`. Bybit open interest has no USD
+  value, so `open_interest_usd` is NaN when Bybit answers.
+- Package metadata moved from `setup.py` to `pyproject.toml`; the version has one source.
+- The package ships `py.typed`.
+- Repository links point to github.com/AnalyticsAscentAkx/crypto-yfinance.
+
 ## 0.3.0 — 2026-09-16
 
 ### Added
