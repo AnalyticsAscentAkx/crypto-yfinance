@@ -249,3 +249,39 @@ def test_funding_annualizes_by_measured_interval(monkeypatch):
     assert len(result) == 3
     assert result["funding_interval_hours"].tolist() == [4, 4, 4]
     assert result["annualized_pct"].iloc[0] == pytest.approx(0.0001 * 6 * 365 * 100)
+
+
+def test_derivatives_fall_back_when_binance_is_blocked(monkeypatch):
+    oi_module = importlib.import_module("cryptofinance.utils.get_open_interest")
+
+    def fake_get_json(url, params=None, timeout=15):
+        if "binance" in url:
+            raise RuntimeError("451 Unavailable For Legal Reasons")
+        return {"retCode": 0, "result": {"list": [
+            {"openInterest": "20", "singleOpenInterest": "10", "timestamp": "1800000000000"},
+        ]}}
+
+    monkeypatch.setattr(oi_module, "get_json", fake_get_json)
+    futures_module = importlib.import_module("cryptofinance.utils.futures")
+    monkeypatch.setattr(futures_module, "get_json", fake_get_json)
+    result = oi_module.get_open_interest("BTC_USD", limit=1)
+    assert result.attrs["source"] == "bybit"
+    assert result.loc[0, "open_interest"] == 10
+    assert pd.isna(result.loc[0, "open_interest_usd"])
+
+
+def test_okx_long_short_ratio_converts_to_shares(monkeypatch):
+    ls_module = importlib.import_module("cryptofinance.utils.get_long_short")
+    result = ls_module._frame([1_800_000_000_000], pd.Series([3.0]) / (1 + 3.0))
+    assert result.loc[0, "long_short_ratio"] == pytest.approx(3.0)
+    assert result.loc[0, "long_pct"] == pytest.approx(75.0)
+
+
+def test_derivatives_error_lists_every_provider(monkeypatch):
+    oi_module = importlib.import_module("cryptofinance.utils.get_open_interest")
+    futures_module = importlib.import_module("cryptofinance.utils.futures")
+    failing = Mock(side_effect=RuntimeError("down"))
+    monkeypatch.setattr(oi_module, "get_json", failing)
+    monkeypatch.setattr(futures_module, "get_json", failing)
+    with pytest.raises(ValueError, match="binance: down; bybit: down; okx: down"):
+        oi_module.get_open_interest("BTC_USD")
