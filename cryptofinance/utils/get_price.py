@@ -20,8 +20,9 @@ def _ccxt_try(exchange, symbols):
         logger.debug("Price provider failed: %s", exc)
     return None
 
-@ttl_cache(ttl=300)
+@ttl_cache(ttl=15)
 def get_price(symbol: str) -> float:
+    """Current spot price, cached for at most 15 seconds."""
     base, quote = (p.lower() for p in split_pair(symbol))
     bU, qU = base.upper(), quote.upper()
 

@@ -81,7 +81,7 @@ class Ticker:
 
     @property
     def price(self) -> float:
-        """Current spot price."""
+        """Current spot price (at most 15 seconds old)."""
         return get_price(self._symbol)
 
     def history(self, days: int = 30, interval: str = "daily") -> pd.DataFrame:
