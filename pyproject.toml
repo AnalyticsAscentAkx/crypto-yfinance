@@ -53,3 +53,6 @@ version = { attr = "cryptofinance.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["cryptofinance*"]
+
+[tool.setuptools.package-data]
+cryptofinance = ["py.typed"]
